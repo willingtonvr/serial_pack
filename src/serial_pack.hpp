@@ -2,31 +2,38 @@
 
 el paquete de datos estara conformado de la siguiente forma:
 
-INCIO del frame 0X7B = '{'
-longitud paquete:
-tipo de Funcion:
-	Request/set	: 0x53  = 'S'
-	Response	: 0x52  = 'R'
-	Ack			: 0x4B  = 'K'
-Nombre de Funcion:
-	Voltaje 	: 0xA1
-	Corriente 	: 0xA2
-	Tiempo		: 0xA3
- 	Sensor		: 0xA4
- 	LED1		: 0xA8
- 	LED2		: 0xA9
- 	LED3		: 0xAA
-	LED3		: 0xAB
- 	id modulo   : 0xB0
- 	id usuario	: 0xB1
- 	tipo bateria: 0xD0
-Valor de la funcion 2 bytes:
-	MSB byte
-	LSB byte
-Checksum: 255 menos la uma de los bytes todos los valores desde longiud. ignorando
+**INCIO del frame**: 0X7B = '{'
++ **id modulo (2 bytes)**:
+* 	MSB id modulo
+* 	LSB id modulo
++ **Tipo de Funcion**:
+*	Request/set	: 0x53  = 'S'
+*	Response	: 0x52  = 'R'
+*	Ack			: 0x4B  = 'K'
++ **Nombre de Funcion**:
+*	Voltaje 	: 0xA1
+*	Corriente : 0xA2
+*	Tiempo		: 0xA3
+* Sensor1		: 0xA4
+*	Sensor2		: 0xA5
+*	Sensor3		: 0xA5
+*	Sensor4		: 0xA7
+*	LED1		: 0xA8
+*	LED2		: 0xA9
+* LED3		: 0xAA
+*	LED3		: 0xAB
+* 	id modulo   : 0xB0
+* 	id usuario	: 0xB1
+* 	tipo bateria: 0xD0
++ **Valor de la funcion (2 bytes)**:
+*	MSB byte
+*	LSB byte
++ **Checksum: 255 menos la suma de los bytes todos los valores a partir del encabezado.**
++ **FIN PAQUETE** :0x7D = '}'
 FIN PAQUETE 0x7D = '}'
 */
 #include <Arduino.h>
+//#include <Stream.h>
 #ifndef  SERIAL_PACK_H
 #define SERIAL_PACK_H
 /* definiciones generales */
@@ -53,6 +60,7 @@ FIN PAQUETE 0x7D = '}'
 
 class Serial_Pack{
 public:
+  Serial_Pack(uint16_t id_modulo);
   void set_id_modulo(uint16_t newid);
   uint16_t get_id_modulo();
   void set_id_usuario(uint16_t newid);
@@ -61,12 +69,22 @@ public:
   uint8_t get_function();
   void set_cur_value(uint16_t newvalue);
   uint16_t get_cur_value();
-  
+  uint8_t get_cur_value_LSB();
+  uint8_t get_cur_value_MSB();
+  uint8_t getCheckSum(); // calcula el Checksum
+  void setCheckSum();
+  bool ChecksumOK();
+  void leer(Stream *port);
+  void set_set();
+  void set_request();
+  bool getSet_Request();
 private:
   uint16_t id_modulo; // el identificador de este modulo
   uint16_t id_usuario; // el usuario actualmente conectado a este modulo
   uint8_t cur_func; // nombre de la funcion actualmente
   uint16_t cur_value; // valor actual del dato
+  uint8_t checksum;
+  uint8_t set_or_req;  // 0 = Request;  255 = Set
 
 
 };
