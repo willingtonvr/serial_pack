@@ -45,5 +45,5 @@ comunicación entre el master y el sclavo de los mensajes desde el arduino hacia
 + **Valor de la funcion (2 bytes)**:
 *	MSB byte
 *	LSB byte
-+ **Checksum: 255 menos la suma de los bytes todos los valores desde longiud.**
++ **Checksum: 255 menos la suma de los bytes todos los valores a partir del encabezado.**
 + **FIN PAQUETE** :0x7D = '}'
