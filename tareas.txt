@@ -1,0 +1,20 @@
+
+
+programa para leer los datos del Arduino con el protocolo
+
+
+leer estado del puerto de conexion de la bicicleta (libre/ocupado)
+activar/desactivar un puerto de bicicleta:
+colocar el temporizador de la conexion a 0 (para contar el tiempo que esta conectado)
+leer el tiempo que lleva conetada la bicicleta.
+leer el voltaje del puerto de bicicleta.
+leer corriente del puerto de bicicleta.
+leer temperatura del puerto de bicicleta.
+
+
+
+
+
+
+
+

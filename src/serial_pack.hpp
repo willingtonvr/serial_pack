@@ -75,6 +75,7 @@ public:
   void setCheckSum();
   bool ChecksumOK();
   void leer(Stream *port);
+  void enviar(Stream *port);
   void set_set();
   void set_request();
   bool getSet_Request();
@@ -85,7 +86,7 @@ private:
   uint16_t cur_value; // valor actual del dato
   uint8_t checksum;
   uint8_t set_or_req;  // 0 = Request;  255 = Set
-
+  uint8_t t_func;
 
 };
 

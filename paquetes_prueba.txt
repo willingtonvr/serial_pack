@@ -1,0 +1,14 @@
+
+
+
+7B 41 42 53 A8 00 FF C3 7D
+
+prender led
+7B 41 42 53 A8 00 FF 82 7D
+Apagar led
+7B 41 42 53 A8 00 00 81 7D
+
+leer AD0
+7B 41 42 53 D0 00 00 59 7D
+
+
