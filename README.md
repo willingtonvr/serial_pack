@@ -7,8 +7,8 @@
 
 comunicación entre el master y el sclavo de los mensajes desde el arduino hacia el raspberry o viceversa
 
-* voltaje en la batería
-* corriente en la batería
+* voltaje en la batería el valor de voltaje en cada el primer byte sera la parte entra el segundo tendra la parte decilma el valor resultante sera de Byte1 + Byte2/100 
+* corriente en la batería igual al de Voltaje
 * sensor de presencia activado
 * sensor de presencia desactivado
 * id de usuario
