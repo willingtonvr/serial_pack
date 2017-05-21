@@ -3,13 +3,27 @@
 #include "serial_pack.hpp"
 #include <OneWire.h> //Se importan las librerías
 #include <DallasTemperature.h>
+#include <TimerOne.h>
+#include <Adafruit_NeoPixel.h>
+#define PIXEL_PIN    6    // Digital IO pin connected to the NeoPixels.
+
+#define PIXEL_COUNT 1
+
+// Parameter 1 = number of pixels in strip,  neopixel stick has 8
+// Parameter 2 = pin number (most are valid)
+// Parameter 3 = pixel type flags, add together as needed:
+//   NEO_RGB     Pixels are wired for RGB bitstream
+//   NEO_GRB     Pixels are wired for GRB bitstream, correct for neopixel stick
+//   NEO_KHZ400  400 KHz bitstream (e.g. FLORA pixels)
+//   NEO_KHZ800  800 KHz bitstream (e.g. High Density LED strip), correct for neopixel stick
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXEL_COUNT, PIXEL_PIN, NEO_GRB + NEO_KHZ800);
 
 /// estos pines dependen del modelo del Arduino
 // pines del Arduino UNO
 #define LED1 13
-#define LED2 10
-#define LED3 10
-#define LED4 10
+#define LED2 6  /// esta el neopixel
+#define LED3 5
+#define LED4 4
 // 3 canales de Voltaje
 #define PIN_BAT_V1 A0
 #define PIN_BAT_V2 A1
@@ -33,6 +47,13 @@
 /////////////////////////////
 #define DEV_ADDRESS 0x4142
 /////////////////////////////
+// intervalo de tiempo para enviar el estado del sistema
+#define BCAST_INTERVAL 5
+
+// variales de estado
+float I1,I2,I3; // cooriente
+float V1,V2,V3; // voltaje
+float T1,T2,T3; // temperatura
 
 OneWire ourWire(PIN_WIRE_TEMP); //Se establece el pin declarado como bus para la comunicación OneWire
 DallasTemperature sensors(&ourWire); //Se instancia la librería DallasTemperature
@@ -40,7 +61,9 @@ const float Sensibilidad=0.185; //sensibilidad en Voltios/Amperio para sensor de
 
 Serial_Pack sp_in(DEV_ADDRESS);
 Serial_Pack sp_out(DEV_ADDRESS);
-
+long ticks=0;
+long pticks=0;
+bool broad_cast=false;
 void setup(){
   pinMode(LED1,OUTPUT);
   pinMode(LED2,OUTPUT);
@@ -57,12 +80,35 @@ void setup(){
   digitalWrite(LED1,LOW);
   /* es cierto :|
   */
+  // incializacion del neopixe
+  //
+  strip.begin();
+  strip.show(); // Initialize all pixels to 'off'
   delay(200);
   Serial.begin(9600);
+  Serial.println("{CARGADOR BICICLEAS V0.1}");
   sensors.begin(); //Se inician los sensores
-  Serial.println("Listos para la accion");
-}
+  Timer1.initialize(1000000); // timer de 1 segundo para contar el tiempo
+  Timer1.attachInterrupt(inc_segundos);
+  broad_cast=false;
+  for (byte i = 0; i < 10; i++) {
+    /* code */
 
+    strip.setPixelColor(0, 255,  0, 255);
+    strip.show();
+    delay(200);
+    strip.setPixelColor(0, 255,  0, 0);
+    strip.show();
+    delay(200);
+
+  }
+
+
+}
+void inc_segundos(){
+  ticks++;
+  if ((ticks-pticks) >BCAST_INTERVAL) broad_cast=true;
+}
 float get_corriente(int n_muestras,byte PIN_READ)
 {
   float voltajeSensor;
@@ -85,6 +131,29 @@ float get_voltaje(int n_muestras,byte PIN_READ)
   }
   return(voltajeSensor);
 }
+void broadcast(){  // emitimos el estado
+      //Serial.print("Tick: ");
+      //Serial.println(ticks);
+      send_estatus(N_FUNC_CORR1, I1);
+      send_estatus(N_FUNC_CORR2, I2);
+      send_estatus(N_FUNC_CORR3, I3);
+
+      send_estatus(N_FUNC_VOLT1, V1);
+      send_estatus(N_FUNC_VOLT2, V2);
+      send_estatus(N_FUNC_VOLT3, V3);
+
+      send_estatus(N_FUNC_TEMP1, T1);
+      send_estatus(N_FUNC_TEMP2, T2);
+      send_estatus(N_FUNC_TEMP3, T3);
+
+}
+void send_estatus(uint8_t funcion,float valor ){
+  sp_out.set_function(funcion);
+  sp_out.set_cur_value(valor);
+  sp_out.enviar(&Serial);
+  delay(1);
+}
+
 
 void loop(){
 // leer el Serial
@@ -92,18 +161,25 @@ void loop(){
 // verificar el Checksum
 // si Checksum esta ok actuar
 // muesreo de variables
-float I1=get_corriente(N_MUESTRAS,PIN_BAT_I1);//obtenemos la corriente promedio
-float I2=get_corriente(N_MUESTRAS,PIN_BAT_I2);
-float I3=get_corriente(N_MUESTRAS,PIN_BAT_I3);
+I1=get_corriente(N_MUESTRAS,PIN_BAT_I1);//obtenemos la corriente promedio
+I2=get_corriente(N_MUESTRAS,PIN_BAT_I2);
+I3=get_corriente(N_MUESTRAS,PIN_BAT_I3);
 
-float V1=get_voltaje(N_MUESTRAS,PIN_BAT_V1);//obtenemos el Voltaje promedio
-float V2=get_voltaje(N_MUESTRAS,PIN_BAT_V2);
-float V3=get_voltaje(N_MUESTRAS,PIN_BAT_V3);
+V1=get_voltaje(N_MUESTRAS,PIN_BAT_V1);//obtenemos el Voltaje promedio
+V2=get_voltaje(N_MUESTRAS,PIN_BAT_V2);
+V3=get_voltaje(N_MUESTRAS,PIN_BAT_V3);
 
 sensors.requestTemperatures(); //Prepara el sensor para la lectura
-float T1 = sensors.getTempCByIndex(0);
-float T2 = sensors.getTempCByIndex(1);
-float T3 = sensors.getTempCByIndex(2);
+T1 = sensors.getTempCByIndex(0);
+T2 = sensors.getTempCByIndex(1);
+T3 = sensors.getTempCByIndex(2);
+
+if (broad_cast) {
+  broadcast();
+  pticks=ticks;
+  broad_cast=false;
+}
+
 
 sp_in.leer(&Serial);
 
@@ -123,11 +199,16 @@ if (sp_in.ChecksumOK()) {
       };
     break;
     case N_FUNC_LED2:
-        if (sp_in.get_cur_value_LSB_L()==255){
-            digitalWrite(LED2, HIGH);
-        } else {
-            digitalWrite(LED2, LOW);
-        };
+        // enviar funcion al NeoPixel
+        //
+
+        strip.setPixelColor(sp_in.get_cur_value_MSB_H(),  // numero de pixels
+                            sp_in.get_cur_value_MSB_L(),  // R
+                            sp_in.get_cur_value_LSB_H(),  // G
+                            sp_in.get_cur_value_LSB_L()  // B
+                          );
+        strip.show();
+
     break;
     case N_FUNC_LED3:
         if (sp_in.get_cur_value_LSB_L()==255){
@@ -144,51 +225,32 @@ if (sp_in.ChecksumOK()) {
         };
     break;
     case N_FUNC_CORR1: // Corriente de bateria
-        sp_out.set_function(N_FUNC_CORR1);
-        sp_out.set_cur_value(I1);
-        sp_out.enviar(&Serial);
+        send_estatus(N_FUNC_CORR1, I1);
     break;
     case N_FUNC_CORR2: // Corriente de bateria
-        sp_out.set_function(N_FUNC_CORR2);
-        sp_out.set_cur_value(I2);
-        sp_out.enviar(&Serial);
+        send_estatus(N_FUNC_CORR2, I2);
     break;
     case N_FUNC_CORR3: // Corriente de bateria
-        sp_out.set_function(N_FUNC_CORR3);
-        sp_out.set_cur_value(I3);
-        sp_out.enviar(&Serial);
+        send_estatus(N_FUNC_CORR3, I3);
     break;
     case N_FUNC_VOLT1: // Voltaje de bateria 1
-        sp_out.set_function(N_FUNC_VOLT1);
-        sp_out.set_cur_value(V1);
-        sp_out.enviar(&Serial);
+        send_estatus(N_FUNC_VOLT1, V1);
     break;
     case N_FUNC_VOLT2: // Voltaje de bateria 2
-        sp_out.set_function(N_FUNC_VOLT2);
-        sp_out.set_cur_value(V2);
-        sp_out.enviar(&Serial);
+      send_estatus(N_FUNC_VOLT2, V2);
     break;
     case N_FUNC_VOLT3: // Voltaje de bateria 3
-        sp_out.set_function(N_FUNC_VOLT3);
-        sp_out.set_cur_value(V3);
-        sp_out.enviar(&Serial);
+        send_estatus(N_FUNC_VOLT3, V3);
     break;
     case N_FUNC_TEMP1: // temperatura 1
-        sp_out.set_function(N_FUNC_TEMP1);
-        sp_out.set_cur_value(T1);
-        sp_out.enviar(&Serial);
+        send_estatus(N_FUNC_TEMP1, T1);
     break;
     case N_FUNC_TEMP2:
-        sp_out.set_function(N_FUNC_TEMP2);
-        sp_out.set_cur_value(T2);
-        sp_out.enviar(&Serial);
+        send_estatus(N_FUNC_TEMP2, T2);
     break;
     case N_FUNC_TEMP3:
-        sp_out.set_function(N_FUNC_TEMP3);
-        sp_out.set_cur_value(T3);
-        sp_out.enviar(&Serial);
+        send_estatus(N_FUNC_TEMP3, T3);
     break;
-
 
   }
 }
