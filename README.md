@@ -47,7 +47,8 @@ comunicación entre el master y el sclavo de los mensajes desde el arduino hacia
 *	LED1		  : 0xA8
 *	LED2		  : 0xA9
 * LED3		  : 0xAA
-*	LED3      : 0xAB
+*	LED4      : 0xAB
+*	NEOPIXEL  : 0xAC
 * 	id modulo   : 0xB0
 * 	id usuario	: 0xB1
 * 	tipo bateria: 0xE0
