@@ -264,6 +264,38 @@ if (sp_in.getSet_Request()){  // activar hardware
                             );
           strip.show();
       break;
+      case N_FUNC_NEO_BLINK5:
+          for (byte i = 0; i < 5; i++) {
+            /* code */
+          strip.setPixelColor(sp_in.get_cur_value_MSB_H(),0,0,0);
+          strip.show();
+          delay(200);
+          strip.setPixelColor(sp_in.get_cur_value_MSB_H(),  // numero de pixels
+                              sp_in.get_cur_value_MSB_L(),  // R
+                              sp_in.get_cur_value_LSB_H(),  // G
+                              sp_in.get_cur_value_LSB_L()  // B
+                            );
+          strip.show();
+          delay(200);
+          }
+
+      break;
+      case N_FUNC_NEO_BLINK10:
+          for (byte i = 0; i < 10; i++) {
+            /* code */
+          strip.setPixelColor(sp_in.get_cur_value_MSB_H(),0,0,0);
+          strip.show();
+          delay(300);
+          strip.setPixelColor(sp_in.get_cur_value_MSB_H(),  // numero de pixels
+                              sp_in.get_cur_value_MSB_L(),  // R
+                              sp_in.get_cur_value_LSB_H(),  // G
+                              sp_in.get_cur_value_LSB_L()  // B
+                            );
+          strip.show();
+          delay(300);
+          }
+
+      break;
     }
 
 } else { // enviar lecturas hardware

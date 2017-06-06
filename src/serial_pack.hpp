@@ -31,6 +31,8 @@
 #define N_FUNC_LED3  0xAA // Led 3
 #define N_FUNC_LED4  0xAB // led 4
 #define N_FUNC_NEO   0xAC // led NEOPIXEL
+#define N_FUNC_NEO_BLINK5 0xAD
+#define N_FUNC_NEO_BLINK10 0xAE
 #define N_FUNC_MOD   0xB0 // Id modulo
 #define N_FUNC_USR   0xA1 // Id usuario
 #define N_FUNC_BAT   0xD0 // tipo bateria
