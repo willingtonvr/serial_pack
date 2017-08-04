@@ -36,13 +36,44 @@
 #define N_FUNC_MOD   0xB0 // Id modulo
 #define N_FUNC_USR   0xA1 // Id usuario
 #define N_FUNC_BAT   0xD0 // tipo bateria
+// AGREAMOS FUNCIONES TIPO CNC
+// EN GENERAL CADA EJE PUEDE EJECUTAR 4 FUNCIONES DISTINTAS
+
+#define CNC_AX0_F01 0x10
+#define CNC_AX0_F02 0x11
+#define CNC_AX0_F03 0x12
+#define CNC_AX0_F04 0x13
+
+#define CNC_AX1_F01 0x14
+#define CNC_AX1_F02 0x15
+#define CNC_AX1_F03 0x16
+#define CNC_AX1_F04 0x17
+
+#define CNC_AX2_F01 0x18
+#define CNC_AX2_F02 0x19
+#define CNC_AX2_F03 0x1A
+#define CNC_AX2_F04 0x1B
+
+#define CNC_AX3_F01 0x1C
+#define CNC_AX3_F02 0x1D
+#define CNC_AX3_F03 0x1E
+#define CNC_AX3_F04 0x1F
+
+#define CNC_AX4_F01 0x20
+#define CNC_AX4_F02 0x21
+#define CNC_AX4_F03 0x22
+#define CNC_AX4_F04 0x23
+
+#define CNC_AX5_F01 0x24
+#define CNC_AX5_F02 0x25
+#define CNC_AX5_F03 0x26
+#define CNC_AX5_F04 0x27
 
 typedef union {
  float float_valor;
  uint32_t uint32val;
  uint8_t binary[4];
 } binary4;
-
 
 
 class Serial_Pack{
