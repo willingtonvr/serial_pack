@@ -17,6 +17,7 @@
 *.mod
 *.smod
 
+
 # Compiled Static libraries
 *.lai
 *.la
@@ -31,3 +32,7 @@
 .piolibdeps
 .clang_complete
 .gcc-flags.json
+
+#archivos de lazarus
+lazClient/backup/
+lazClient/lib/

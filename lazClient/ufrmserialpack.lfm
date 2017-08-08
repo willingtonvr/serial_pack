@@ -1,0 +1,159 @@
+object frmSerialPack: TfrmSerialPack
+  Left = 279
+  Height = 247
+  Top = 147
+  Width = 487
+  Caption = 'Envio de paquetes de control'
+  ClientHeight = 247
+  ClientWidth = 487
+  OnCreate = FormCreate
+  LCLVersion = '1.4.4.0'
+  object cmdEnviar: TButton
+    Left = 272
+    Height = 33
+    Top = 176
+    Width = 65
+    Caption = 'Enviar'
+    OnClick = cmdEnviarClick
+    TabOrder = 0
+  end
+  object cmdExit: TButton
+    Left = 390
+    Height = 33
+    Top = 208
+    Width = 76
+    Caption = 'Salir'
+    OnClick = cmdExitClick
+    TabOrder = 1
+  end
+  object txtEjej: TEdit
+    Left = 92
+    Height = 23
+    Top = 34
+    Width = 75
+    OnChange = txtEjejChange
+    TabOrder = 2
+    Text = '1'
+  end
+  object Label1: TLabel
+    Left = 64
+    Height = 15
+    Top = 34
+    Width = 15
+    Caption = 'Eje'
+    ParentColor = False
+  end
+  object txtValor: TEdit
+    Left = 92
+    Height = 23
+    Top = 80
+    Width = 72
+    OnChange = txtValorChange
+    TabOrder = 3
+    Text = '100'
+  end
+  object txtDev1: TEdit
+    Left = 94
+    Height = 23
+    Top = 120
+    Width = 68
+    TabOrder = 4
+    Text = '41'
+  end
+  object txtDev2: TEdit
+    Left = 94
+    Height = 23
+    Top = 156
+    Width = 68
+    TabOrder = 5
+    Text = '42'
+  end
+  object GroupBox1: TGroupBox
+    Left = 264
+    Height = 95
+    Top = 16
+    Width = 202
+    Caption = 'Puerto'
+    ClientHeight = 75
+    ClientWidth = 198
+    TabOrder = 6
+    object txtPort: TEdit
+      Left = 8
+      Height = 23
+      Top = 8
+      Width = 79
+      TabOrder = 0
+    end
+    object cmdConfig: TButton
+      Left = 105
+      Height = 21
+      Top = 8
+      Width = 79
+      Caption = 'Configurar'
+      OnClick = cmdConfigClick
+      TabOrder = 1
+    end
+    object cmdOpenPort: TButton
+      Left = 8
+      Height = 22
+      Top = 45
+      Width = 84
+      Caption = 'Abrir'
+      OnClick = cmdOpenPortClick
+      TabOrder = 2
+    end
+    object cmdClosePort: TButton
+      Left = 105
+      Height = 22
+      Top = 45
+      Width = 84
+      Caption = 'Cerrar'
+      OnClick = cmdClosePortClick
+      TabOrder = 3
+    end
+  end
+  object Label2: TLabel
+    Left = 40
+    Height = 15
+    Top = 84
+    Width = 27
+    Caption = 'Valor'
+    ParentColor = False
+  end
+  object txtPack: TEdit
+    Left = 272
+    Height = 23
+    Top = 112
+    Width = 194
+    OnChange = txtPackChange
+    TabOrder = 7
+  end
+  object txtTfunc: TEdit
+    Left = 92
+    Height = 23
+    Top = 192
+    Width = 65
+    TabOrder = 8
+    Text = '53'
+  end
+  object pacHex: TEdit
+    Left = 272
+    Height = 23
+    Top = 144
+    Width = 194
+    TabOrder = 9
+  end
+  object Serial: TLazSerial
+    Active = False
+    BaudRate = br___110
+    DataBits = db8bits
+    Parity = pNone
+    FlowControl = fcNone
+    StopBits = sbOne
+    Device = 'COM1'
+    RcvLineCRLF = False
+    OnRxData = SerialRxData
+    left = 24
+    top = 232
+  end
+end

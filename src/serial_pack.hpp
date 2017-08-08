@@ -36,6 +36,7 @@
 #define N_FUNC_MOD   0xB0 // Id modulo
 #define N_FUNC_USR   0xA1 // Id usuario
 #define N_FUNC_BAT   0xD0 // tipo bateria
+#define N_FUNC_BCAST_ENABLE   0xF1 // tipo bateria
 // AGREAMOS FUNCIONES TIPO CNC
 // EN GENERAL CADA EJE PUEDE EJECUTAR 4 FUNCIONES DISTINTAS
 

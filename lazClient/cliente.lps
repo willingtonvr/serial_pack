@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="9"/>
+    <BuildModes Active="Default"/>
+    <Units Count="3">
+      <Unit0>
+        <Filename Value="cliente.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="-1"/>
+        <CursorPos X="-1" Y="-1"/>
+        <UsageCount Value="20"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="ufrmserialpack.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmSerialPack"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ufrmSerialPack"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="145"/>
+        <CursorPos X="36" Y="153"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="C:\lazarus\lcl\include\customedit.inc"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="546"/>
+        <CursorPos X="54" Y="552"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit2>
+    </Units>
+    <JumpHistory Count="30" HistoryIndex="29">
+      <Position1>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="41" Column="14" TopLine="37"/>
+      </Position1>
+      <Position2>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="152" Column="24" TopLine="138"/>
+      </Position2>
+      <Position3>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="121" TopLine="116"/>
+      </Position3>
+      <Position4>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="122" TopLine="116"/>
+      </Position4>
+      <Position5>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="123" TopLine="116"/>
+      </Position5>
+      <Position6>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="124" TopLine="116"/>
+      </Position6>
+      <Position7>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="125" TopLine="116"/>
+      </Position7>
+      <Position8>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="126" TopLine="116"/>
+      </Position8>
+      <Position9>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="127" TopLine="116"/>
+      </Position9>
+      <Position10>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="128" TopLine="116"/>
+      </Position10>
+      <Position11>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="129" TopLine="116"/>
+      </Position11>
+      <Position12>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="130" TopLine="116"/>
+      </Position12>
+      <Position13>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="132" TopLine="135"/>
+      </Position13>
+      <Position14>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="133" TopLine="125"/>
+      </Position14>
+      <Position15>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="134" TopLine="125"/>
+      </Position15>
+      <Position16>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="135" TopLine="125"/>
+      </Position16>
+      <Position17>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="137" TopLine="125"/>
+      </Position17>
+      <Position18>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="139" TopLine="125"/>
+      </Position18>
+      <Position19>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="141" TopLine="127"/>
+      </Position19>
+      <Position20>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="142" TopLine="128"/>
+      </Position20>
+      <Position21>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="143" TopLine="129"/>
+      </Position21>
+      <Position22>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="144" TopLine="130"/>
+      </Position22>
+      <Position23>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="145" TopLine="131"/>
+      </Position23>
+      <Position24>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="146" TopLine="132"/>
+      </Position24>
+      <Position25>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="147" TopLine="133"/>
+      </Position25>
+      <Position26>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="149" TopLine="135"/>
+      </Position26>
+      <Position27>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="150" TopLine="136"/>
+      </Position27>
+      <Position28>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="151" TopLine="137"/>
+      </Position28>
+      <Position29>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="152" Column="43" TopLine="139"/>
+      </Position29>
+      <Position30>
+        <Filename Value="ufrmserialpack.pas"/>
+        <Caret Line="154" Column="37" TopLine="139"/>
+      </Position30>
+    </JumpHistory>
+  </ProjectSession>
+</CONFIG>

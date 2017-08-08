@@ -1,13 +1,15 @@
 // progra de prueba
 #include "Arduino.h"
 #include "serial_pack.hpp"
-#include <OneWire.h> //Se importan las librerías
-#include <DallasTemperature.h>
 #include <TimerOne.h>
-#define PIXEL_PIN    12    // Digital IO pin connected to the NeoPixels.
-#define PIXEL_COUNT  4
+#include <Servo.h>
+#define DEBUG
+#define LED1 13
+#define LED2 13
+#define LED3 13
+#define LED4 13
 
-// 4 canales de Voltaje las 2 ultimas lecturas seran compartidas
+// 4 canales de Voltaje las 2 ultimas lecturas seran compart7B 41 42 53 11 00 00 00 01 9C 7Didas
 #define PIN_BAT_V1 A0
 #define PIN_BAT_V2 A1
 #define PIN_BAT_V3 A2
@@ -25,15 +27,16 @@
 #define PIN_ACTU2 LED2
 #define PIN_ACTU3 LED3
 #define PIN_ACTU4 LED4
-#define N_MUESTRAS 200 // numero de muestras por variable
-// los sensores de temperatura van todos por oneWire
-#define PIN_WIRE_TEMP 2 //Se declara el PIN_WIRE_TEMP donde se conectará la DATA
+
 // DIRECCION DEL MODULO
 /////////////////////////////
 #define DEV_ADDRESS 0x4142
 /////////////////////////////
 // intervalo de tiempo para enviar el estado del sistema
 #define BCAST_INTERVAL 30
+#define N_MUESTRAS 200
+// definicion de la velocidad serial
+#define BAUD_RATE 9600
 // DEFINICIONES DE CADA MODULO
 // AQUI SELECCIONA EL NO DE EJE QUE VA ESCUCHAR
 
@@ -41,6 +44,11 @@
 #define MI_FUNCION_02  CNC_AX0_F02
 #define MI_FUNCION_03  CNC_AX0_F03
 #define MI_FUNCION_04  CNC_AX0_F04
+
+#define DOBLA_PIN 9
+#define ALIMENTA_PIN 10
+Servo servo_alim;
+Servo servo_dobla;
 
 
 // FIN DEFINICION DE EJE
@@ -54,65 +62,37 @@ Serial_Pack sp_in(DEV_ADDRESS);
 Serial_Pack sp_out(DEV_ADDRESS);
 long ticks=0;
 long pticks=0;
+bool bcast_enabled=true;
 bool broad_cast=false;
+
 void setup(){
-  pinMode(LED1,OUTPUT);
-  pinMode(LED2,OUTPUT);
-  pinMode(LED3,OUTPUT);
-  pinMode(LED4,OUTPUT);
-  pinMode(PIXEL_PIN,OUTPUT);
 
-  pinMode(PIN_BAT_I1,INPUT);
-  pinMode(PIN_BAT_I2,INPUT);
-  pinMode(PIN_BAT_I3,INPUT);
-  pinMode(PIN_BAT_V1,INPUT);
-  pinMode(PIN_BAT_V2,INPUT);
-  pinMode(PIN_BAT_V3,INPUT);
 
-  /* manuela afirma que hay un led en el pin 13 de todo Arduino
-  */
-  digitalWrite(LED1,HIGH);
-  delay(200);
-  digitalWrite(LED1,LOW);
-  delay(200);
-  digitalWrite(LED1,HIGH);
-  delay(500);
-  digitalWrite(LED1,LOW);
-  delay(200);
-  digitalWrite(LED1,LOW);
-  /* es cierto :|
-  */
-  // incializacion del neopixe
-  //
-  strip.begin();
-  strip.show(); // Initialize all pixels to 'off'
-  delay(200);
-  Serial.begin(9600);
-  Serial.println("{CARGADOR BICICLEAS V0.1}");
-  sensors.begin(); //Se inician los sensores
+  pinMode(LED1, OUTPUT);
+
   Timer1.initialize(1000000); // timer de 1 segundo para contar el tiempo
   Timer1.attachInterrupt(inc_segundos);
   broad_cast=false;
-  for (byte j = 0; j < 4; j++) {
-
-    for (byte i = 0; i < 5; i++) {
-      /* code */
-      strip.setPixelColor(j, 255,  0, 255);
-      strip.show();
-      delay(100);
-      strip.setPixelColor(j, 255,  0, 0);
-      strip.show();
-      delay(100);
-    }
+  servo_alim.attach(ALIMENTA_PIN);
+  servo_dobla.attach(DOBLA_PIN);
+  // 10 destellos para informar que arranco
+  blink_led1();
+  digitalWrite(LED1,LOW);
+  Serial.begin(BAUD_RATE);
+  Serial.println("{WIRE BEND CONTROLLER V0.1}");
+  init_servo_pos();
 }
-  for (byte j = 0; j < 4; j++) {
-    strip.setPixelColor(j, 0,  0, 0);
+void blink_led1(){
+  for (int  i = 0;  i < 10;  i++) {
+    digitalWrite(LED1,HIGH);
+    delay(200);
+    digitalWrite(LED1,LOW);
+    delay(200);
   }
-  strip.show();
 }
 void inc_segundos(){
   ticks++;
-  if ((ticks-pticks) >BCAST_INTERVAL) broad_cast=true;
+  if (((ticks-pticks) >BCAST_INTERVAL) && bcast_enabled) broad_cast=true;
 }
 float get_corriente(int n_muestras,byte PIN_READ)
 {
@@ -121,7 +101,7 @@ float get_corriente(int n_muestras,byte PIN_READ)
   for(int i=0;i<n_muestras;i++)
   {
     voltajeSensor = analogRead(PIN_READ) * (5.0 / 1023.0);////lectura del sensor
-    corriente = corriente +  (voltajeSensor-2.5)/Sensibilidad; //Ecuación  para obtener la corriente
+    corriente = corriente +  (voltajeSensor-2.5)/1.1; //Ecuación  para obtener la corriente
   }
 
   return(corriente/n_muestras);
@@ -308,24 +288,56 @@ sp_in.set_function(N_FUNC_NULL);
 // en este ejemplo es un servo el valor puede estar entre -100 a 100 grados
 void ejecutar_funcion(int nfunc,float valor){
 
+  switch (nfunc) {
+    case MI_FUNCION_01:
+        if (valor<0) {   // retroceso
+          retroceso();
+        }else{  // avance
+          avance();
+        }
+
+    break;
+    case MI_FUNCION_02:  // doblar
+          dobla(int(valor));
+    break;
+    case MI_FUNCION_03:
+
+    break;
+    case MI_FUNCION_04:
+
+    break;
 
 
-switch (nfunc) {
-  case MI_FUNCION_01:
-
-  break;
-  case MI_FUNCION_02:
-
-  break;
-  case MI_FUNCION_03:
-
-  break;
-  case MI_FUNCION_04:
-
-  break;
+  }
 
 
 }
+void avance() {
+  servo_alim.write(105);
+  delay(50);
+  servo_alim.write(95);
 
+}
+void retroceso() {
+  servo_alim.write(75);
+  delay(50);
+  servo_alim.write(95);
+}
+void dobla(int angulo){
+  //blink_led1();
+  servo_dobla.write(angulo);
+  delay(1000);
+  servo_dobla.write(5);
+  delay(50);
 
+}
+void init_servo_pos(){
+  servo_dobla.write(5);
+
+}
+void stop_servos() {
+  //servo_base.detach();
+  //servo_brazo.detach();
+  analogWrite(DOBLA_PIN, 0);
+  analogWrite(ALIMENTA_PIN, 0);
 }

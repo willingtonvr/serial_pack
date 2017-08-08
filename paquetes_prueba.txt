@@ -22,3 +22,31 @@ LEER CORRIENTE 2
 
 7B 41 42 53 D2 00 00 00 00 57 7D
 
+llamada a funcion CNC
+funcion 1
+
+1 en float
+0x3f800000
+
+7B 41 42 53 10 3F 80 00 00 5A 7D
+
+-1 float es:
+0xbf 80 00 00
+
+7B 41 42 53 10 BF 80 00 00 DA 7D
+
+funcion 2 con 20 = 41a00000
+
+7B 41 42 53 11 41 A0 00 00 37 7D
+
+funcion 2 con 60 = 42700000
+
+7B 41 42 53 11 42 70 00 00 66 7D
+
+funcion 2 con 90 = 42b40000
+
+7B 41 42 53 11 42 b4 00 00 22 7D
+
+funcion 2 con 100 = 42c80000
+
+7B 41 42 53 11 42 C8 00 00 0E 7D
