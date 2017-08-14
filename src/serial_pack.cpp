@@ -79,6 +79,7 @@ uint8_t Serial_Pack::getCheckSum() {// calcula el Checksum
 //constructor
 Serial_Pack::Serial_Pack(uint16_t id_modulo){
 this->id_modulo=id_modulo;
+t_func=T_FUNC_SET;
 
 };
 
@@ -178,6 +179,12 @@ void Serial_Pack::set_request(){
 bool Serial_Pack::getSet_Request(){
   return (bool) set_or_req;
 };
+void Serial_Pack::set_t_func(uint8_t new_t_func){
+  t_func=new_t_func;
+};
+uint8_t Serial_Pack::get_t_func(){
+  return t_func;
+};
 void Serial_Pack::enviar(Stream *port){
   uint8_t MSB_id=0;
   uint8_t LSB_id=0;
@@ -190,7 +197,7 @@ void Serial_Pack::enviar(Stream *port){
   port->write((uint8_t) START_PACK);
   port->write((uint8_t) MSB_id);
   port->write((uint8_t) LSB_id);
-  t_func=T_FUNC_SET;
+  //t_func=T_FUNC_SET;
   port->write((uint8_t) t_func);
   port->write((uint8_t) cur_func);
   port->write((uint8_t) cur_value.binary[3]);

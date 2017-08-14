@@ -70,6 +70,11 @@
 #define CNC_AX5_F03 0x26
 #define CNC_AX5_F04 0x27
 
+#define CNC_AX6_F01 0x28
+#define CNC_AX6_F02 0x29
+#define CNC_AX6_F03 0x2A
+#define CNC_AX6_F04 0x2B
+
 typedef union {
  float float_valor;
  uint32_t uint32val;
@@ -103,6 +108,9 @@ public:
   void set_set();
   void set_request();
   bool getSet_Request();
+  void set_t_func(uint8_t new_t_func);
+  uint8_t get_t_func();
+
 private:
   uint16_t id_modulo; // el identificador de este modulo
   uint16_t id_usuario; // el usuario actualmente conectado a este modulo

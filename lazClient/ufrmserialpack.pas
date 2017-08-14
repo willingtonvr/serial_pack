@@ -155,15 +155,25 @@ begin
      buff+=chr(tmpByteD2);
      tmpByteTF:=byte(StrToInt('$'+ txtTfunc.Text));
      buff+=chr(tmpByteTF);
-     valor := StrToFloat(txtValor.Text);
+     if txtValor.Text='' then
+     begin
+        valor := 0 ;
+     end
+     else
+         valor := StrToFloat(txtValor.Text);
+
      valorC.FloatValue:=valor;
 
      byte1:=valorC.ByteArray[3];
      byte2:=valorC.ByteArray[2];
      byte3:=valorC.ByteArray[1];
      byte4:=valorC.ByteArray[0];
-
-     tmpByteNF := 16+ byte(strtoint(txtEjej.Text));
+     if txtEjej.Text='' then
+       begin
+           tmpByteNF := 16;
+       end
+     else
+         tmpByteNF := 16+ byte(strtoint(txtEjej.Text));
 
      checksum:= $FF - byte(tmpByteD1+tmpByteD2+tmpByteTF+tmpByteNF+ byte1+ byte2+ byte3+ byte4);
 

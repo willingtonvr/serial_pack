@@ -4,9 +4,9 @@
 #include <TimerOne.h>
 #include <Servo.h>
 #define DEBUG
-#define LED1 13
-#define LED2 13
-#define LED3 13
+#define LED1 13   // led de destello
+#define LED2 2    // led verde
+#define LED3 4    // del rojo
 #define LED4 13
 
 // 4 canales de Voltaje las 2 ultimas lecturas seran compart7B 41 42 53 11 00 00 00 01 9C 7Didas
@@ -39,17 +39,28 @@
 #define BAUD_RATE 9600
 // DEFINICIONES DE CADA MODULO
 // AQUI SELECCIONA EL NO DE EJE QUE VA ESCUCHAR
+// pines para leeer el eje seleccionado
+#define EJE1 10
+#define EJE2 11
+#define EJE3 12
 
-#define MI_FUNCION_01  CNC_AX0_F01
-#define MI_FUNCION_02  CNC_AX0_F02
-#define MI_FUNCION_03  CNC_AX0_F03
-#define MI_FUNCION_04  CNC_AX0_F04
 
-#define DOBLA_PIN 9
-#define ALIMENTA_PIN 10
+// numeros de la funcion del eje
+#define MI_EJE_F01 0x01
+#define MI_EJE_F02 0x02
+#define MI_EJE_F03 0x03
+#define MI_EJE_F04 0x04
+
+#define DIR A0  // PIN A0 para el Pulso al driver
+#define PULSO A1  // PIN A1 para la direccion al driver
+
+#define DOBLA_PIN 3
+#define ALIMENTA_PIN 5
 Servo servo_alim;
 Servo servo_dobla;
-
+int mi_eje=0xFF;
+bool mi_eje_enabled=false;
+float cal_factor = 1.0; // factor de calibracion mecanica del eje
 
 // FIN DEFINICION DE EJE
 // variales de estado
@@ -69,6 +80,16 @@ void setup(){
 
 
   pinMode(LED1, OUTPUT);
+  pinMode(LED2, OUTPUT);
+  pinMode(LED3, OUTPUT);
+  pinMode(LED4, OUTPUT);
+
+  pinMode(DIR, OUTPUT);
+  pinMode(PULSO, OUTPUT);
+
+  pinMode(EJE1,INPUT);
+  pinMode(EJE2,INPUT);
+  pinMode(EJE3,INPUT);
 
   Timer1.initialize(1000000); // timer de 1 segundo para contar el tiempo
   Timer1.attachInterrupt(inc_segundos);
@@ -76,12 +97,27 @@ void setup(){
   servo_alim.attach(ALIMENTA_PIN);
   servo_dobla.attach(DOBLA_PIN);
   // 10 destellos para informar que arranco
+
   blink_led1();
-  digitalWrite(LED1,LOW);
+  digitalWrite(LED2,LOW);
+  digitalWrite(LED3,HIGH);   // led verde off y rojo ON todavia no esta listo
   Serial.begin(BAUD_RATE);
-  Serial.println("{WIRE BEND CONTROLLER V0.1}");
+  // Serial.println("{WIRE BEND CONTROLLER V0.1}");
   init_servo_pos();
+  leer_mi_eje();
 }
+void leer_mi_eje(){
+  byte Bit0 = 0;
+  byte Bit1 = 0;
+  byte Bit2 = 0;
+  mi_eje =0;
+  if (digitalRead(EJE1)==HIGH ) Bit0 =1; else Bit0=0;
+  if (digitalRead(EJE2)==HIGH ) Bit1 =2; else Bit1=0;
+  if (digitalRead(EJE3)==HIGH ) Bit2 =4; else Bit2=0;
+  // esto es equivalente a B2+B1+B0
+  mi_eje = (Bit2 | Bit1 | Bit0);
+
+};
 void blink_led1(){
   for (int  i = 0;  i < 10;  i++) {
     digitalWrite(LED1,HIGH);
@@ -146,14 +182,27 @@ void broadcast(){  // emitimos el estado
       send_estatus(N_FUNC_TEMP4, T4);
       delay(10);
 }
+void send_eje_listo(){
+  sp_out.set_t_func(T_FUNC_ACK);
+  sp_out.set_function(N_FUNC_NULL);
+  sp_out.set_cur_value(float(mi_eje));
+
+};
 void send_estatus(uint8_t funcion,float valor ){
   sp_out.set_function(funcion);
+  sp_out.set_t_func(T_FUNC_REQ);
   sp_out.set_cur_value(valor);
   sp_out.enviar(&Serial);
   Serial.flush();
   //delay(1);
 }
-
+void send_ack(int8_t funcion,float valor){
+  sp_out.set_function(funcion);
+  sp_out.set_t_func(T_FUNC_ACK);
+  sp_out.set_cur_value(valor);
+  sp_out.enviar(&Serial);
+  Serial.flush();
+}
 
 void loop(){
 // leer el Serial
@@ -226,13 +275,40 @@ if (sp_in.getSet_Request()){  // activar hardware
       break;
 
       // ejecuta las funciones de cada eje
-      case MI_FUNCION_01:
-      case MI_FUNCION_02:
-      case MI_FUNCION_03:
-      case MI_FUNCION_04:
-        ejecutar_funcion(sp_in.get_function(),sp_in.get_cur_valuef());
-      break;
+      case CNC_AX0_F01: if (mi_eje==0) ejecutar_funcion(MI_EJE_F01,sp_in.get_cur_valuef()); break;
+      case CNC_AX0_F02: if (mi_eje==0) ejecutar_funcion(MI_EJE_F02,sp_in.get_cur_valuef()); break;
+      case CNC_AX0_F03: if (mi_eje==0) ejecutar_funcion(MI_EJE_F03,sp_in.get_cur_valuef()); break;
+      case CNC_AX0_F04: if (mi_eje==0) ejecutar_funcion(MI_EJE_F04,sp_in.get_cur_valuef()); break;
 
+      case CNC_AX1_F01: if (mi_eje==1) ejecutar_funcion(MI_EJE_F01,sp_in.get_cur_valuef()); break;
+      case CNC_AX1_F02: if (mi_eje==1) ejecutar_funcion(MI_EJE_F02,sp_in.get_cur_valuef()); break;
+      case CNC_AX1_F03: if (mi_eje==1) ejecutar_funcion(MI_EJE_F03,sp_in.get_cur_valuef()); break;
+      case CNC_AX1_F04: if (mi_eje==1) ejecutar_funcion(MI_EJE_F04,sp_in.get_cur_valuef()); break;
+
+      case CNC_AX2_F01: if (mi_eje==2) ejecutar_funcion(MI_EJE_F01,sp_in.get_cur_valuef()); break;
+      case CNC_AX2_F02: if (mi_eje==2) ejecutar_funcion(MI_EJE_F02,sp_in.get_cur_valuef()); break;
+      case CNC_AX2_F03: if (mi_eje==2) ejecutar_funcion(MI_EJE_F03,sp_in.get_cur_valuef()); break;
+      case CNC_AX2_F04: if (mi_eje==2) ejecutar_funcion(MI_EJE_F04,sp_in.get_cur_valuef()); break;
+
+      case CNC_AX3_F01: if (mi_eje==3) ejecutar_funcion(MI_EJE_F01,sp_in.get_cur_valuef()); break;
+      case CNC_AX3_F02: if (mi_eje==3) ejecutar_funcion(MI_EJE_F02,sp_in.get_cur_valuef()); break;
+      case CNC_AX3_F03: if (mi_eje==3) ejecutar_funcion(MI_EJE_F03,sp_in.get_cur_valuef()); break;
+      case CNC_AX3_F04: if (mi_eje==3) ejecutar_funcion(MI_EJE_F04,sp_in.get_cur_valuef()); break;
+
+      case CNC_AX4_F01: if (mi_eje==4) ejecutar_funcion(MI_EJE_F01,sp_in.get_cur_valuef()); break;
+      case CNC_AX4_F02: if (mi_eje==4) ejecutar_funcion(MI_EJE_F02,sp_in.get_cur_valuef()); break;
+      case CNC_AX4_F03: if (mi_eje==4) ejecutar_funcion(MI_EJE_F03,sp_in.get_cur_valuef()); break;
+      case CNC_AX4_F04: if (mi_eje==4) ejecutar_funcion(MI_EJE_F04,sp_in.get_cur_valuef()); break;
+
+      case CNC_AX5_F01: if (mi_eje==5) ejecutar_funcion(MI_EJE_F01,sp_in.get_cur_valuef()); break;
+      case CNC_AX5_F02: if (mi_eje==5) ejecutar_funcion(MI_EJE_F02,sp_in.get_cur_valuef()); break;
+      case CNC_AX5_F03: if (mi_eje==5) ejecutar_funcion(MI_EJE_F03,sp_in.get_cur_valuef()); break;
+      case CNC_AX5_F04: if (mi_eje==5) ejecutar_funcion(MI_EJE_F04,sp_in.get_cur_valuef()); break;
+
+      case CNC_AX6_F01: if (mi_eje==6) ejecutar_funcion2(MI_EJE_F01,sp_in.get_cur_valuef()); break;
+      case CNC_AX6_F02: if (mi_eje==6) ejecutar_funcion2(MI_EJE_F02,sp_in.get_cur_valuef()); break;
+      case CNC_AX6_F03: if (mi_eje==6) ejecutar_funcion2(MI_EJE_F03,sp_in.get_cur_valuef()); break;
+      case CNC_AX6_F04: if (mi_eje==6) ejecutar_funcion2(MI_EJE_F04,sp_in.get_cur_valuef()); break;
 
     }
 
@@ -289,30 +365,102 @@ sp_in.set_function(N_FUNC_NULL);
 void ejecutar_funcion(int nfunc,float valor){
 
   switch (nfunc) {
-    case MI_FUNCION_01:
-        if (valor<0) {   // retroceso
-          retroceso();
-        }else{  // avance
-          avance();
-        }
+    case MI_EJE_F01:  // funcion 1 envio avance / rertoceso por unidades absolutas
+        if (mi_eje_enabled) enviar_distancia(valor);
+    break;
+    case MI_EJE_F02:  // funcion 2 avance / retroceso por pulsos
+        if (mi_eje_enabled) enviar_pulsos(valor);
+    break;
+    case MI_EJE_F03: // funcion 3 acepar valor de calibracion distancia / pulsos
+        cal_factor = valor;
+    break;
+    case MI_EJE_F04:  // funcion 4 // habilitar/ deshabilitar el eje
+      if (valor>99) mi_eje_enabled=true; else mi_eje_enabled=false;
+      if (mi_eje_enabled) {
+        digitalWrite(LED2,HIGH);  // habilitado luz Verde
+        digitalWrite(LED3,LOW);
+      } else{
+        digitalWrite(LED2,LOW);  // no va a procesar nada Luz roja
+        digitalWrite(LED3,HIGH);
+      }
+    break;
+  }
+  // enviamos ACK para decir que terminamos
+
+
+  send_ack(nfunc, valor);
+
+}
+// funcioes diferentes para el eje 6
+void ejecutar_funcion2(int nfunc,float valor){
+
+  switch (nfunc) {
+    case MI_EJE_F01:  // funcion 1 envio avance / rertoceso por unidades absolutas
+        if (mi_eje_enabled)avanzar(valor);
+    break;
+    case MI_EJE_F02:  // funcion 2 acance / retroceso por pulsos
+        if (mi_eje_enabled) dobla(int(valor));
 
     break;
-    case MI_FUNCION_02:  // doblar
-          dobla(int(valor));
-    break;
-    case MI_FUNCION_03:
+    case MI_EJE_F03:
 
     break;
-    case MI_FUNCION_04:
+    case MI_EJE_F04:  // funcion 4 // habilitar/ deshabilitar el eje
+      if (valor>99) mi_eje_enabled=true; else mi_eje_enabled=false;
+      if (mi_eje_enabled) {
+        digitalWrite(LED2,HIGH);  // habilitado luz Verde
+        digitalWrite(LED3,LOW);
+      } else{
+        digitalWrite(LED2,LOW);  // no va a procesar nada Luz roja
+        digitalWrite(LED3,HIGH);
+      }
 
     break;
 
 
   }
+  // enviamos ACK para decir que terminamos
 
+  send_ack(nfunc, valor);
 
 }
-void avance() {
+
+void enviar_distancia(float valor){
+  float n_pulsos=0;
+  n_pulsos = valor * cal_factor;
+  enviar_pulsos(n_pulsos);
+};
+void enviar_pulsos(float pulsos){
+  int int_pulsos = int(pulsos);
+  int direccion =0;
+  if (pulsos>0) direccion=HIGH; else direccion=LOW;
+
+  // esta funcion es critica, basicamente la funcion digitalWrite es muy lenta
+  // asi que se debe hacer acceso directo a alos puertos para mayor velocidad
+  // antes de optimizar usamos digitalWrite si es muy lento pasamos
+  // a un acceso masrapido tipo PORTC = PORTC | BITMASK
+
+  digitalWrite(DIR,direccion);
+
+  for (int i = 0;i < int_pulsos; i++) {
+    digitalWrite(PULSO,HIGH);
+    delayMicroseconds(5);  // la frecuencia maxima del driver es de 200 Kpss
+    digitalWrite(PULSO,LOW);
+  };
+
+
+
+};
+void avanzar(float cantidad){
+  int n_paso=int(abs(cantidad));
+
+  for (int i = 0; i < n_paso; i++) {
+    if (cantidad >0) avance(); else retroceso();
+  }
+
+};
+
+void avance()  {
   servo_alim.write(105);
   delay(50);
   servo_alim.write(95);
