@@ -6,8 +6,8 @@
 #define DEBUG
 #define LED1 13   // led de destello
 #define LED2 2    // led verde
-#define LED3 4    // del rojo
-#define LED4 13
+#define LED3 3    // del rojo
+#define LED4 4    // PIN SERVO ON
 
 // 4 canales de Voltaje las 2 ultimas lecturas seran compart7B 41 42 53 11 00 00 00 01 9C 7Didas
 #define PIN_BAT_V1 A0
@@ -378,9 +378,11 @@ void ejecutar_funcion(int nfunc,float valor){
       if (valor>99) mi_eje_enabled=true; else mi_eje_enabled=false;
       if (mi_eje_enabled) {
         digitalWrite(LED2,HIGH);  // habilitado luz Verde
+        digitalWrite(LED4,HIGH);  // habilitado SERVO ON
         digitalWrite(LED3,LOW);
       } else{
         digitalWrite(LED2,LOW);  // no va a procesar nada Luz roja
+        digitalWrite(LED4,LOW);  // Servo off
         digitalWrite(LED3,HIGH);
       }
     break;

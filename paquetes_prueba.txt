@@ -50,3 +50,22 @@ funcion 2 con 90 = 42b40000
 funcion 2 con 100 = 42c80000
 
 7B 41 42 53 11 42 C8 00 00 0E 7D
+
+funcion 4 enable
+
+7B 41 42 53 13 42 C8 00 00 0C 7D
+
+funcion 4 disable
+
+7B 41 42 53 13 C1 20 00 00 35 7D
+
+
+funcion 2 con -20
+
+7B 41 42 53 11 C1 20 00 00 37 7D
+
+
+
+
+
+
