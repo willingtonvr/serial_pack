@@ -60,7 +60,7 @@ Servo servo_alim;
 Servo servo_dobla;
 int mi_eje=0xFF;
 bool mi_eje_enabled=false;
-float cal_factor = 1.0; // factor de calibracion mecanica del eje
+float cal_factor = 10.0; // factor de calibracion mecanica del eje
 
 // FIN DEFINICION DE EJE
 // variales de estado
@@ -433,7 +433,7 @@ void enviar_distancia(float valor){
   enviar_pulsos(n_pulsos);
 };
 void enviar_pulsos(float pulsos){
-  int int_pulsos = int(pulsos);
+  int int_pulsos = int(abs(pulsos));
   int direccion =0;
   if (pulsos>0) direccion=HIGH; else direccion=LOW;
 
@@ -444,9 +444,15 @@ void enviar_pulsos(float pulsos){
 
   digitalWrite(DIR,direccion);
 
+  // arranque suave
+  // maxima velocidad
+  // desacelerar
+
+
   for (int i = 0;i < int_pulsos; i++) {
     digitalWrite(PULSO,HIGH);
-    delayMicroseconds(5);  // la frecuencia maxima del driver es de 200 Kpss
+    //delayMicroseconds(5);  // la frecuencia maxima del driver es de 200 Kpss
+    delayMicroseconds(int(cal_factor));
     digitalWrite(PULSO,LOW);
   };
 
