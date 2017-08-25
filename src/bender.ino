@@ -2,12 +2,9 @@
 #include "Arduino.h"
 #include "serial_pack.hpp"
 #include <TimerOne.h>
-#include <Servo.h>
 #define DEBUG
 #define LED1 13   // led de destello
-#define LED2 2    // led verde
-#define LED3 3    // del rojo
-#define LED4 4    // PIN SERVO ON
+
 
 // 4 canales de Voltaje las 2 ultimas lecturas seran compart7B 41 42 53 11 00 00 00 01 9C 7Didas
 #define PIN_BAT_V1 A0
@@ -40,10 +37,36 @@
 // DEFINICIONES DE CADA MODULO
 // AQUI SELECCIONA EL NO DE EJE QUE VA ESCUCHAR
 // pines para leeer el eje seleccionado
+
+// quitar el comentario para usar un Arduino UNO
+// #define BOARD_UNO
+
+#ifdef BOARD_UNO   ///definiciones si se usa Arduino UNO
 #define EJE1 10
 #define EJE2 11
 #define EJE3 12
 
+#define LED2 2    // led verde
+#define LED3 3    // del rojo
+#define LED4 4    // PIN SERVO ON
+
+#define DIR A0  // PIN A0 para el Pulso al driver
+#define PULSO A1  // PIN A1 para la direccion al driver
+
+#else     ///definiciones si se usa Arduino MEGA
+#define BOARD_MEGA
+#define EJE1 35
+#define EJE2 36
+#define EJE3 37
+
+#define LED2 32    // led verde
+#define LED3 31    // del rojo
+#define LED4 30    // PIN SERVO ON
+
+#define DIR A2  // PIN A2 para el Pulso al driver
+#define PULSO A0  // PIN A0 para la direccion al driver
+
+#endif
 
 // numeros de la funcion del eje
 #define MI_EJE_F01 0x01
@@ -51,16 +74,9 @@
 #define MI_EJE_F03 0x03
 #define MI_EJE_F04 0x04
 
-#define DIR A0  // PIN A0 para el Pulso al driver
-#define PULSO A1  // PIN A1 para la direccion al driver
-
-#define DOBLA_PIN 3
-#define ALIMENTA_PIN 5
-Servo servo_alim;
-Servo servo_dobla;
 int mi_eje=0xFF;
 bool mi_eje_enabled=false;
-float cal_factor = 10.0; // factor de calibracion mecanica del eje
+float cal_factor = 5550.0; // factor de calibracion mecanica del eje aprox 180 grados en 1 segundo
 
 // FIN DEFINICION DE EJE
 // variales de estado
@@ -94,17 +110,18 @@ void setup(){
   Timer1.initialize(1000000); // timer de 1 segundo para contar el tiempo
   Timer1.attachInterrupt(inc_segundos);
   broad_cast=false;
-  servo_alim.attach(ALIMENTA_PIN);
-  servo_dobla.attach(DOBLA_PIN);
+
   // 10 destellos para informar que arranco
 
-  blink_led1();
+  blink_led1(10);
   digitalWrite(LED2,LOW);
   digitalWrite(LED3,HIGH);   // led verde off y rojo ON todavia no esta listo
   Serial.begin(BAUD_RATE);
   // Serial.println("{WIRE BEND CONTROLLER V0.1}");
-  init_servo_pos();
   leer_mi_eje();
+  // una cantidad de destellos sengun el No de eje
+  blink_led1(mi_eje);
+
 }
 void leer_mi_eje(){
   byte Bit0 = 0;
@@ -118,8 +135,8 @@ void leer_mi_eje(){
   mi_eje = (Bit2 | Bit1 | Bit0);
 
 };
-void blink_led1(){
-  for (int  i = 0;  i < 10;  i++) {
+void blink_led1(int blinks){
+  for (int  i = 0;  i < blinks;  i++) {
     digitalWrite(LED1,HIGH);
     delay(200);
     digitalWrite(LED1,LOW);
@@ -305,10 +322,10 @@ if (sp_in.getSet_Request()){  // activar hardware
       case CNC_AX5_F03: if (mi_eje==5) ejecutar_funcion(MI_EJE_F03,sp_in.get_cur_valuef()); break;
       case CNC_AX5_F04: if (mi_eje==5) ejecutar_funcion(MI_EJE_F04,sp_in.get_cur_valuef()); break;
 
-      case CNC_AX6_F01: if (mi_eje==6) ejecutar_funcion2(MI_EJE_F01,sp_in.get_cur_valuef()); break;
-      case CNC_AX6_F02: if (mi_eje==6) ejecutar_funcion2(MI_EJE_F02,sp_in.get_cur_valuef()); break;
-      case CNC_AX6_F03: if (mi_eje==6) ejecutar_funcion2(MI_EJE_F03,sp_in.get_cur_valuef()); break;
-      case CNC_AX6_F04: if (mi_eje==6) ejecutar_funcion2(MI_EJE_F04,sp_in.get_cur_valuef()); break;
+      case CNC_AX6_F01: if (mi_eje==6) ejecutar_funcion(MI_EJE_F01,sp_in.get_cur_valuef()); break;
+      case CNC_AX6_F02: if (mi_eje==6) ejecutar_funcion(MI_EJE_F02,sp_in.get_cur_valuef()); break;
+      case CNC_AX6_F03: if (mi_eje==6) ejecutar_funcion(MI_EJE_F03,sp_in.get_cur_valuef()); break;
+      case CNC_AX6_F04: if (mi_eje==6) ejecutar_funcion(MI_EJE_F04,sp_in.get_cur_valuef()); break;
 
     }
 
@@ -371,8 +388,8 @@ void ejecutar_funcion(int nfunc,float valor){
     case MI_EJE_F02:  // funcion 2 avance / retroceso por pulsos
         if (mi_eje_enabled) enviar_pulsos(valor);
     break;
-    case MI_EJE_F03: // funcion 3 acepar valor de calibracion distancia / pulsos
-        cal_factor = valor;
+    case MI_EJE_F03: // funcion 3 acepar valor de calibracion de velocidad / pulsos
+        cal_factor = abs(valor);
     break;
     case MI_EJE_F04:  // funcion 4 // habilitar/ deshabilitar el eje
       if (valor>99) mi_eje_enabled=true; else mi_eje_enabled=false;
@@ -393,39 +410,7 @@ void ejecutar_funcion(int nfunc,float valor){
   send_ack(nfunc, valor);
 
 }
-// funcioes diferentes para el eje 6
-void ejecutar_funcion2(int nfunc,float valor){
 
-  switch (nfunc) {
-    case MI_EJE_F01:  // funcion 1 envio avance / rertoceso por unidades absolutas
-        if (mi_eje_enabled)avanzar(valor);
-    break;
-    case MI_EJE_F02:  // funcion 2 acance / retroceso por pulsos
-        if (mi_eje_enabled) dobla(int(valor));
-
-    break;
-    case MI_EJE_F03:
-
-    break;
-    case MI_EJE_F04:  // funcion 4 // habilitar/ deshabilitar el eje
-      if (valor>99) mi_eje_enabled=true; else mi_eje_enabled=false;
-      if (mi_eje_enabled) {
-        digitalWrite(LED2,HIGH);  // habilitado luz Verde
-        digitalWrite(LED3,LOW);
-      } else{
-        digitalWrite(LED2,LOW);  // no va a procesar nada Luz roja
-        digitalWrite(LED3,HIGH);
-      }
-
-    break;
-
-
-  }
-  // enviamos ACK para decir que terminamos
-
-  send_ack(nfunc, valor);
-
-}
 
 void enviar_distancia(float valor){
   float n_pulsos=0;
@@ -459,41 +444,3 @@ void enviar_pulsos(float pulsos){
 
 
 };
-void avanzar(float cantidad){
-  int n_paso=int(abs(cantidad));
-
-  for (int i = 0; i < n_paso; i++) {
-    if (cantidad >0) avance(); else retroceso();
-  }
-
-};
-
-void avance()  {
-  servo_alim.write(105);
-  delay(50);
-  servo_alim.write(95);
-
-}
-void retroceso() {
-  servo_alim.write(75);
-  delay(50);
-  servo_alim.write(95);
-}
-void dobla(int angulo){
-  //blink_led1();
-  servo_dobla.write(angulo);
-  delay(1000);
-  servo_dobla.write(5);
-  delay(50);
-
-}
-void init_servo_pos(){
-  servo_dobla.write(5);
-
-}
-void stop_servos() {
-  //servo_base.detach();
-  //servo_brazo.detach();
-  analogWrite(DOBLA_PIN, 0);
-  analogWrite(ALIMENTA_PIN, 0);
-}
